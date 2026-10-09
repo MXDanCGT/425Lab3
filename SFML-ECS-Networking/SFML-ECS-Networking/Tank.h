@@ -27,6 +27,14 @@ public:
 		bool right = false;
 	} isMoving;
 
+
+	bool bPendingColourUpdate = false;
+	// Saving current colour here in case we need to send elsewhere.
+	std::string ColourString = "";
+
+	/*Set our sprite image to the one from the colour string*/
+	void UpdateSpriteFromColourString();
+
 private:
 	// Temporary placeholder texture, make sue to replace before rendering the sprite.
 	sf::Texture placeholder = sf::Texture(sf::Vector2u(1, 1));
@@ -41,8 +49,5 @@ private:
 
 	float movementSpeed = 150.f;
 	float rotationSpeed = 200.f;
-
-	// Saving current colour here in case we need to send elsewhere.
-	std::string colorString = "";
 };
 

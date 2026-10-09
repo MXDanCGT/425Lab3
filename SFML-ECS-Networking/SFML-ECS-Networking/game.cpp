@@ -38,6 +38,46 @@ void Game::HandleEvents(const std::optional<sf::Event> event)
 		if (keyPressed->scancode == sf::Keyboard::Scancode::D) {
 
 		}
+
+		if (keyPressed->scancode == sf::Keyboard::Scancode::Num1)
+		{
+			//Black
+			if (tank.ColourString == "black")
+				return;
+
+			tank.ColourString == "black";
+			tank.bPendingColourUpdate = true;
+		}
+		else if (keyPressed->scancode == sf::Keyboard::Scancode::Num2)
+		{
+			//Blue
+
+			if (tank.ColourString == "blue")
+				return;
+
+			tank.ColourString == "blue";
+			tank.bPendingColourUpdate = true;
+		}
+		else if (keyPressed->scancode == sf::Keyboard::Scancode::Num3)
+		{
+			//Green
+
+			if (tank.ColourString == "green")
+				return;
+
+			tank.ColourString == "green";
+			tank.bPendingColourUpdate = true;
+		}
+		else if (keyPressed->scancode == sf::Keyboard::Scancode::Num4)
+		{
+			//Red
+
+			if (tank.ColourString == "red")
+				return;
+
+			tank.ColourString == "red";
+			tank.bPendingColourUpdate = true;
+		}
 	}
 
 	// Handle key release events passed from window.
@@ -58,14 +98,28 @@ void Game::Update(float dt)
 	tank.Update(dt);
 }
 
-void Game::NetworkUpdate(float dt, TankMessage data) {
-	// Force position update from network data.
-	tank.position = { data.x, data.y };
-	// Update tank with new position.
-	// NOTE: This assumets no inputs were detected and so the tank will only move according to 
-	// network updates. This is not ideal and prone to unexpected behaviour if game is extended
-	// to be fully multiplayer. 
-	tank.Update(dt);
+void Game::NetworkUpdate(float dt, TankMessage data) 
+{
+	
+	if (data.MessageType == 0)
+	{
+		TankMessageColour ColourMessage = *(TankMessageColour*)&data;
+		tank.ColourString = ColourMessage.ColourString;
+		tank.UpdateSpriteFromColourString(); //Do the thing!
+	}
+	else
+	{
+		TankMessageMove MoveMessage = *(TankMessageMove*)&data;
+
+		// Force position update from network data.
+		tank.position = { MoveMessage.x, MoveMessage.y };
+		tank.bodyRotation = sf::radians(MoveMessage.rotation);
+		// Update tank with new position.
+		// NOTE: This assumets no inputs were detected and so the tank will only move according to 
+		// network updates. This is not ideal and prone to unexpected behaviour if game is extended
+		// to be fully multiplayer. 
+		tank.Update(dt);
+	}
 }
 
 void Game::Render(sf::RenderWindow& window)
@@ -76,5 +130,5 @@ void Game::Render(sf::RenderWindow& window)
 
 TankMessage Game::GetNetworkUpdate()
 {
-	return { tank.position.x, tank.position.y };
+
 }

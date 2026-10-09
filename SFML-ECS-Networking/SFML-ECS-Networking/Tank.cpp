@@ -3,16 +3,9 @@
 Tank::Tank(std::string colour)
 {
 	// Save input colour in case we need it later.
-	colorString = colour;
+	ColourString = colour;
 
-	// Load textures.
-	// FIXME: loadFromFile returns a bool if texture was loaded successfully. We should use it to check for errors.
-	bodyTexture.loadFromFile("Assets/" + colour + "Tank.png");
-	barrelTexture.loadFromFile("Assets/" + colour + "Barrel.png");
-
-	// Apply tetxures to sprites.
-	body.setTexture(bodyTexture);
-	barrel.setTexture(barrelTexture);
+	UpdateSpriteFromColourString();
 
 	// Reset texture rectangle. Applying new texture does not automatically apply it's size to sprite.
 	body.setTextureRect(sf::IntRect({ 0, 0 }, (sf::Vector2i)bodyTexture.getSize()));
@@ -59,9 +52,29 @@ void Tank::Update(float dt)
 	// Apply new position to tank body and barrel.
 	body.setPosition(position);
 	barrel.setPosition(position);
+
+	if(bPendingColourUpdate)
+		UpdateSpriteFromColourString();
 }
 
 const void Tank::Render(sf::RenderWindow &window) {
 		window.draw(body);
 		window.draw(barrel);
+}
+
+void Tank::UpdateSpriteFromColourString()
+{
+	// Load textures.
+
+	if (!bodyTexture.loadFromFile("Assets/" + ColourString + "Tank.png") || !barrelTexture.loadFromFile("Assets/" + ColourString + "Barrel.png"))
+	{
+		//Whoopsies
+		return;
+	}
+
+	// Apply tetxures to sprites.
+	body.setTexture(bodyTexture);
+	barrel.setTexture(barrelTexture);
+
+	bPendingColourUpdate = false;
 }

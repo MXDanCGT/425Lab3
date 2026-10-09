@@ -64,7 +64,7 @@ int main() {
 
 	// Other game parameters.
 	float game_speed = 1.0f;
-	float send_rate = 0.1f;
+	float send_rate = 0.01f; //WHen this is less than frame rate, we get a lot of latency, but why? I thought this behaviour was only really exhibited by TCP?
 	float send_timer = 0;
 
 	while (window.isOpen()) {
@@ -100,12 +100,24 @@ int main() {
 				Utils::printMsg("Recieved message from: " + incoming_ip.value().toString() + ":" + std::to_string(incoming_port));
 				TankMessage message;
 
-				// Read recieved data into TankMessage struct.
-				// FIXME: reading from packet can fail. Refer to documentation on how to
-				// handle errors and add error checking here.
-				packet >> message.x >> message.y;
-				// Use the message data to update the game.
-				game.NetworkUpdate(dt, message);
+				//A - decode the message type...
+				packet >> message.MessageType;
+
+				if (message.MessageType == 0) //Colour update...
+				{
+					//we want to, essentially, recieve this packet, update on it, then check get the next packet; there will always be a move packet each frame, there will only sometimes be colour and it will be first?
+				}
+				else
+				{
+					TankMessageMove MoveMessage = *(TankMessageMove*)&message;
+
+					// Read recieved data into TankMessage struct.
+					// FIXME: reading from packet can fail. Refer to documentation on how to
+					// handle errors and add error checking here.
+					packet >> MoveMessage.x >> MoveMessage.y >> MoveMessage.rotation;
+					// Use the message data to update the game.
+					game.NetworkUpdate(dt, message);
+				}
 			}
 			else {
 				Utils::printMsg("Failed to recieve message from: " + incoming_ip.value().toString() + ":" + std::to_string(incoming_port), error);
@@ -113,24 +125,36 @@ int main() {
 		}
 		else {
 			game.Update(dt);
-			// Get data structure from game, containing update message.
-			TankMessage message = game.GetNetworkUpdate();
-			// Translate our messgage struct to sf::Packet (very rudimentary conversion)
-			packet << message.x << message.y;
-			sf::IpAddress observerIp(127, 0, 0, 1);
+			//Games been updated, now que...
 
-			// Send messages only as often as the send rate allows.
-			if (send_timer >= send_rate) {
-				// FIXME: Send can fail, check for errors and adjust logic accordingly.
-				if (socket.send(packet, observerIp, observer_port) == sf::Socket::Status::Done) {
-					Utils::printMsg("Sent message to: " + observerIp.toString() + ":" + std::to_string(observer_port));
-				}
-				else {
-					Utils::printMsg("Failed to send message to: " + observerIp.toString() + ":" + std::to_string(observer_port), error);
-				}
-				// Reset timer after sending the message
-				send_timer = 0;
-			}
+
+
+			//If we need to update colour, send it!
+
+
+			//// Get data structure from game, containing update message.
+			//TankMessage message = game.GetNetworkUpdate();
+
+			
+
+
+
+			//// Translate our messgage struct to sf::Packet (very rudimentary conversion)
+			//packet << message.x << message.y << message.rotation;
+			//sf::IpAddress observerIp(127, 0, 0, 1);
+
+			//// Send messages only as often as the send rate allows.
+			//if (send_timer >= send_rate) {
+			//	// FIXME: Send can fail, check for errors and adjust logic accordingly.
+			//	if (socket.send(packet, observerIp, observer_port) == sf::Socket::Status::Done) {
+			//		Utils::printMsg("Sent message to: " + observerIp.toString() + ":" + std::to_string(observer_port));
+			//	}
+			//	else {
+			//		Utils::printMsg("Failed to send message to: " + observerIp.toString() + ":" + std::to_string(observer_port), error);
+			//	}
+			//	// Reset timer after sending the message
+			//	send_timer = 0;
+			//}
 		}
 		// Render
 		window.clear();
