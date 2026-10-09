@@ -1,3 +1,8 @@
+Name: Morgan Daniels
+Student Num: 2300399
+
+
+
 CMP425 / CMP501 
 Lab 3 Application-Layer Protocol Example - by Andrei Boiko
 Built using SFML Sockets
